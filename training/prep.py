@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from training_config import columns, OLD_KERNEL
+from training_config import columns
 
 pd.options.mode.chained_assignment = None
 
@@ -20,12 +20,8 @@ def combine_csv(dfs):
     return ret_df
 
 def _preprocess(df):
-    if OLD_KERNEL:
-        print('OLD_KERNEL')
-        df = df.loc[df.p_running.eq(0)]
-        #  df = df.loc[df.throttled.eq(0)]
-    else:
-        df = df.loc[df.test_aggressive.eq(1)]
+    df = df.loc[df.p_running.eq(0)]
+    df = df.loc[df.test_aggressive.eq(1)]
 
     df['delta_hot'] = np.where(df['delta'] < 500000, 1, 0)
     df['src_non_pref_nr'] = np.where(df['src_len'] > df['src_preferred_len'], 1, 0)
@@ -70,12 +66,17 @@ def preprocess(tags, balance=None, out_tag=None):
 
 
 if __name__ == '__main__':
-    tags = ['parsec46', 'ng46', 'ng20', 'idle46']
-    tags = ['idle']
-    out_tag = 'combined71'
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--tags', nargs='+', help='tags list', required=True)
+    parser.add_argument('-o', '--object', help='tag for model object')
+    parser.add_argument('-b', '--balance', action='store_true', help='balance multiple dumps')
+    args = parser.parse_args()
+
+    tags = args.tags
+    out_tag = args.object
+    do_balance = args.balance
 
     DO_BALANCE = 0
-    #  KEEP = 0.43
-    KEEP = 0
 
-    preprocess(tags, DO_BALANCE, out_tag)
+    preprocess(tags, do_balance, out_tag)

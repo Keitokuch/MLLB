@@ -30,8 +30,6 @@ features=[
 
 columns = features + label
 
-OLD_KERNEL = True
-
 #final
 """
 features=[

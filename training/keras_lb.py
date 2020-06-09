@@ -138,12 +138,12 @@ def keras_train(model_tag=None, dump=None, plot_loss=False):
                 print('load model failed')
                 pass
 
-    #final 10-relu batch32-split0.1-epoch3
     if DO_TRAIN:
         if plot_loss:
             histories = Histories()
             history = model.fit(train_X, train_y, batch_size=BATCH_SIZE,
-                                validation_split=0.1, epochs=6, callbacks=[early_stop, histories])
+                                validation_split=0.1, epochs=20, callbacks=[early_stop, histories])
+
             import matplotlib.pyplot as plt
             plt.plot(histories.batches, histories.losses)
             plt.title("Training history of loss vs. batches")
@@ -163,9 +163,9 @@ def keras_train(model_tag=None, dump=None, plot_loss=False):
             plt.show()
         else:
             model.fit(train_X, train_y, batch_size=BATCH_SIZE, validation_split=0.1, epochs=EPOCHS)
-            if DO_SAVE:
-                model.save_weights(WEIGHT_FILE)
-                model.save(MODEL_FILE)
+        if DO_SAVE:
+            model.save_weights(WEIGHT_FILE)
+            model.save(MODEL_FILE)
 
     if DO_DUMP:
         pickle_file = 'pickle_' + model_tag + '.weights'
@@ -201,16 +201,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--object', help='object model', required=True)
     parser.add_argument('-e', '--evaluate')
-    parser.add_argument('-t', '--train', action='store_true')
-    parser.add_argument('-l', '--load', action='store_true')
-    parser.add_argument('-d', '--dump', action='store_true')
-    parser.add_argument('-p', '--plot', action='store_true')
+    parser.add_argument('-t', '--train', action='store_true', help='train model')
+    parser.add_argument('-l', '--load', action='store_true', help='load model')
+    parser.add_argument('-s', '--save', action='store_true', help='save model')
+    parser.add_argument('-d', '--dump', action='store_true', help='dump weights')
+    parser.add_argument('-p', '--plot', action='store_true', help='plot training history')
 
     args = parser.parse_args()
     MODEL_TAG = args.object or MODEL_TAG
     DO_LOAD = args.load
     DO_DUMP = args.dump
     DO_TRAIN = args.train
+    DO_SAVE = args.save
     if args.evaluate:
         DO_EVALUATE = 1
         EVALUATE_TAG = args.evaluate

@@ -4,9 +4,10 @@ import math
 import logging
 
 from numa_map import cpu_nodemap, NR_NODES
-from dump_config import COLUMNS, OLD_KERNEL
+from dump_config import COLUMNS
 
-sysctl_migrate_cost = 500000
+sysctl_migrate_cost = 500000  # Defined in kernel
+
 logger = logging.getLogger('datasource')
 fhdlr = logging.FileHandler('write.log', mode='w')
 fhdlr.terminator=''
@@ -70,8 +71,8 @@ class CanMigrateData(DataSource):
         row['dst_len'] = event.dst_nr_running
         row['src_load'] = event.src_load
         row['dst_load'] = event.dst_load
-        row['nr_fails'] = event.nr_balance_failed;
-        row['cache_nice_tries'] = event.cache_nice_tries;
+        row['nr_fails'] = event.nr_balance_failed
+        row['cache_nice_tries'] = event.cache_nice_tries
         row['buddy_hot'] = event.buddy_hot
         row['p_running'] = event.p_running
         #  row['fair_class'] = event.fair_class

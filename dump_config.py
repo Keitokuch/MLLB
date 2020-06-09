@@ -9,5 +9,3 @@ COLUMNS=['ts', 'curr_pid', 'pid', 'src_cpu', 'dst_cpu', 'imbalance',
                         'test_aggressive',
                         'can_migrate',
                         'pc_0', 'pc_1']
-
-OLD_KERNEL=True

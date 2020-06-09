@@ -8,6 +8,7 @@ DO_EVALUATE     = 1
 LOAD_EVALUATE   = 0
 EVALUATE_TAG = 'default'
 
+# Cross validation
 X_val           = 0
 
 EPOCHS = 3

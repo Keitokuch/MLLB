@@ -116,7 +116,7 @@ struct pid_cpu_key {
     int cpu;
 };
 
-/* BPF Maps */
+
 BPF_HASH(can_migrate_instances, struct pid_cpu_key, struct can_migrate_context);
 BPF_PERF_OUTPUT(can_migrate_events);
 
@@ -145,12 +145,9 @@ struct lb_env {
 
 	enum fbq_type		fbq_type;
 	struct list_head	tasks;
-
-	unsigned int test_aggressive;   /* !! Test Flag */
 };
 
 
-/* Entry Probe */
 int KPROBE(can_migrate_task) (struct pt_regs *ctx, struct task_struct *p, struct lb_env *env)
 {
     struct migrate_data data = {};
@@ -188,8 +185,6 @@ int KPROBE(can_migrate_task) (struct pt_regs *ctx, struct task_struct *p, struct
     data.src_nr_preferred_running = src_rq->nr_preferred_running;
 
     data.dst_nr_running = dst_rq->nr_running;
-    /* data.src_cpu_load = *(src_rq->cpu_load); */
-    /* data.dst_cpu_load = *(dst_rq->cpu_load); */
     data.src_load = src_rq->cfs.avg.load_avg;
     data.dst_load = dst_rq->cfs.avg.load_avg;
 
@@ -214,8 +209,8 @@ int KPROBE(can_migrate_task) (struct pt_regs *ctx, struct task_struct *p, struct
     /* data.f_test[2] = (unsigned long)(p->total_numa_faults); */
     /* data.f_test[3] = (unsigned long)(p->numa_faults[0]); */
 
-    data.perf_count_0 = src_rq->perf_count_0;
-    data.perf_count_1 = src_rq->perf_count_1;
+    data.perf_count_0 = 0;
+    data.perf_count_1 = 0;
 
     context.ts = ts;
     context.cpu = cpu;
@@ -229,7 +224,6 @@ int KPROBE(can_migrate_task) (struct pt_regs *ctx, struct task_struct *p, struct
     return 0;
 }
 
-/* Return Probe */
 int KRETPROBE(can_migrate_task) (struct pt_regs *ctx)
 {
     struct task_struct *p;
@@ -249,11 +243,51 @@ int KRETPROBE(can_migrate_task) (struct pt_regs *ctx)
     data_p = &context->data;
     env = context->env;
 
-    data_p->test_aggressive = env->test_aggressive;
+    data_p->test_aggressive = 1;    // NO test flag in old kernel
 
     data_p->can_migrate = ret;
     can_migrate_events.perf_submit(ctx, data_p, sizeof(*data_p));
 
     can_migrate_instances.delete(&key);
     return 0;
+}
+
+
+/* Dumps rq data including tasks */
+/* NOT USED */
+static void dump_rq(struct rq_data *data, struct rq *rq) {
+
+    struct cfs_rq *cfs;
+    struct task_struct *curr_task;
+    struct list_head *head, *pos;
+    int i;
+    struct task_struct *task;
+
+    cfs = &rq->cfs;
+    curr_task = rq->curr;
+    data->curr_pid = curr_task->pid;
+    data->cpu = rq->cpu;
+    bpf_probe_read_str(&(data->comm), sizeof(data->comm), curr_task->comm);
+    data->h_nr_running = cfs->h_nr_running;
+    data->runnable_weight = cfs->runnable_weight;
+    data->pid_cnt = 0;
+
+    head = &(rq->cfs_tasks);
+    pos = head;
+    int j = 0;
+    for (i = 0; i < NR_LOOPS; i++) {
+        pos = pos->next;
+        if (pos == head)
+            break;
+        task = container_of(pos, struct task_struct, se.group_node);
+        data->pids[j] = task->pid;
+        j++;
+        pos = pos->next;
+        if (pos == head)
+            break;
+        task = container_of(pos, struct task_struct, se.group_node);
+        data->pids[j] = task->pid;
+        j++;
+    }
+    data->pid_cnt = j;
 }
