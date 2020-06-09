@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import sys
 from training_config import *
 from keras_conf import *

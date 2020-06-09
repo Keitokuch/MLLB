@@ -21,11 +21,6 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-    /* pthread_attr_init(&attr); */
-
-    /* pthread_t thread; */
-    /* pthread_create(&thread, &attr, fibo, (void *)count); */
-    /* pthread_join(thread, &ret); */
     ret = fibo((void *)count);
 
     printf("fibo out: %lu\n", (unsigned long)ret);
