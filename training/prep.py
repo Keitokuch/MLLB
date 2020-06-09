@@ -63,6 +63,8 @@ def preprocess(tags, balance=None, out_tag=None):
             print('Combined output', output)
 
         combined.to_csv(output, index=False)
+    else:
+        dfs[0].to_csv(output, index=False)
 
 
 if __name__ == '__main__':
