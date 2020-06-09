@@ -7,8 +7,19 @@ Prerequisites:
 - [Tensorflow](https://www.tensorflow.org/)
 
 
-Dump load balance data: `dump_lb.py`
+Dump load balance data:
+``` bash
+sudo ./dump_lb.py -t tag --old
+```
+> use `--old` with original kernel without test flag
 
 Preprocessing: `training/prep.py`
 
 Training: `training/keras_lb.py`
+
+Automated training and evaluation:
+```bash 
+cd training
+./automate.py -t tag1 tag2 tag3... -o model_name
+```
+
