@@ -1,5 +1,4 @@
-### Source code of paper "Machine Learning for Load Balancing in the Linux Kernel"
-
+### Source code of paper [*Machine Learning for Load Balancing in the Linux Kernel*](https://doi.org/10.1145/3409963.3410492)
 
 Prerequisites:
 
